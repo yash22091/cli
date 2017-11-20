@@ -17,6 +17,7 @@ import (
 
 type ShareServiceActor interface {
 	ShareServiceInstanceByOrganizationAndSpaceName(serviceInstanceName string, orgGUID string, spaceName string) (v3action.Warnings, error)
+	ShareServiceInstanceByOrganizationNameAndSpaceName(serviceInstanceName string, orgName string, spaceName string) (v3action.Warnings, error)
 }
 
 type V3ShareServiceCommand struct {
@@ -59,19 +60,32 @@ func (cmd V3ShareServiceCommand) Execute(args []string) error {
 		return err
 	}
 
-	user, _ := cmd.Config.CurrentUser()
-	// if err != nil {
-	// 	return err
-	// }
+	user, err := cmd.Config.CurrentUser()
+	if err != nil {
+		return err
+	}
+
+	orgName := cmd.Config.TargetedOrganization().Name
+
+	if cmd.OrgName != "" {
+		orgName = cmd.OrgName
+	}
 
 	cmd.UI.DisplayTextWithFlavor("Sharing service instance {{.ServiceInstanceName}} into org {{.OrgName}} / space {{.SpaceName}} as {{.Username}}...", map[string]interface{}{
 		"ServiceInstanceName": cmd.RequiredArgs.ServiceInstance,
-		"OrgName":             cmd.Config.TargetedOrganization().Name,
+		"OrgName":             orgName,
 		"SpaceName":           cmd.SpaceName,
 		"Username":            user.Name,
 	})
 
-	warnings, err := cmd.Actor.ShareServiceInstanceByOrganizationAndSpaceName(cmd.RequiredArgs.ServiceInstance, cmd.Config.TargetedOrganization().GUID, cmd.SpaceName)
+	var warnings v3action.Warnings
+
+	if cmd.OrgName != "" {
+		warnings, err = cmd.Actor.ShareServiceInstanceByOrganizationNameAndSpaceName(cmd.RequiredArgs.ServiceInstance, cmd.OrgName, cmd.SpaceName)
+	} else {
+		warnings, err = cmd.Actor.ShareServiceInstanceByOrganizationAndSpaceName(cmd.RequiredArgs.ServiceInstance, cmd.Config.TargetedOrganization().GUID, cmd.SpaceName)
+	}
+
 	cmd.UI.DisplayWarnings(warnings)
 	if err != nil {
 		return err
