@@ -1,7 +1,6 @@
 package v3action
 
 import (
-	"fmt"
 	"net/url"
 
 	"code.cloudfoundry.org/cli/actor/actionerror"
@@ -14,24 +13,18 @@ func (actor Actor) ShareServiceInstanceByOrganizationAndSpaceName(serviceInstanc
 	// get the service instnace guid
 	serviceInstance, _, err := actor.GetServiceInstanceByName(serviceInstanceName)
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
 
 	space, _, err := actor.GetSpaceByName(spaceName)
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
 
-	//Think about name of this.
-	relationship, _, err := actor.CloudControllerClient.PostServiceInstanceSharedSpaces(serviceInstance.GUID, []string{space.GUID})
+	////Think about name of this
+	_, _, err = actor.CloudControllerClient.PostServiceInstanceSharedSpaces(serviceInstance.GUID, []string{space.GUID})
 
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	fmt.Println(relationship)
-
-	return nil, nil
+	return nil, err
 }
 
 func (actor Actor) GetServiceInstanceByName(serviceInstanceName string) (ServiceInstance, Warnings, error) {
