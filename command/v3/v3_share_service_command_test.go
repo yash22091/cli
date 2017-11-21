@@ -113,55 +113,88 @@ var _ = Describe("share-service Command", func() {
 					nil)
 			})
 
-			Context("when provided a valid service instance", func() {
-				Context("when using the currently targeted org", func() {
-					Context("when the share to space exists", func() {
-						BeforeEach(func() {
-							cmd.SpaceName = "some-space"
-							fakeActor.ShareServiceInstanceByOrganizationAndSpaceNameReturns(
-								v3action.Warnings{"share-service-warning"},
-								nil)
-						})
+			Context("when using the currently targeted org", func() {
+				Context("when the sharing is successful", func() {
+					BeforeEach(func() {
+						cmd.SpaceName = "some-space"
+						fakeActor.ShareServiceInstanceInSpaceByOrganizationAndSpaceNameReturns(
+							v3action.Warnings{"share-service-warning"},
+							nil)
+					})
 
-						It("shares the service instance with the provided space and displays all warnings", func() {
-							Expect(executeErr).ToNot(HaveOccurred())
+					It("shares the service instance with the provided space and displays all warnings", func() {
+						Expect(executeErr).ToNot(HaveOccurred())
 
-							Expect(testUI.Out).To(Say("Sharing service instance some-service-instance into org some-org / space some-space as some-user\\.\\.\\."))
-							Expect(testUI.Out).To(Say("OK"))
-							Expect(testUI.Err).To(Say("share-service-warning"))
+						Expect(testUI.Out).To(Say("Sharing service instance some-service-instance into org some-org / space some-space as some-user\\.\\.\\."))
+						Expect(testUI.Out).To(Say("OK"))
+						Expect(testUI.Err).To(Say("share-service-warning"))
 
-							Expect(fakeActor.ShareServiceInstanceByOrganizationAndSpaceNameCallCount()).To(Equal(1))
-							serviceInstanceNameArg, orgGUIDArg, spaceNameArg := fakeActor.ShareServiceInstanceByOrganizationAndSpaceNameArgsForCall(0)
-							Expect(serviceInstanceNameArg).To(Equal("some-service-instance"))
-							Expect(orgGUIDArg).To(Equal("some-org-guid"))
-							Expect(spaceNameArg).To(Equal("some-space"))
-						})
+						Expect(fakeActor.ShareServiceInstanceInSpaceByOrganizationAndSpaceNameCallCount()).To(Equal(1))
+						serviceInstanceNameArg, sourceSpaceGUIDArg, orgGUIDArg, spaceNameArg := fakeActor.ShareServiceInstanceInSpaceByOrganizationAndSpaceNameArgsForCall(0)
+						Expect(serviceInstanceNameArg).To(Equal("some-service-instance"))
+						Expect(sourceSpaceGUIDArg).To(Equal("some-space-guid"))
+						Expect(orgGUIDArg).To(Equal("some-org-guid"))
+						Expect(spaceNameArg).To(Equal("some-space"))
 					})
 				})
 
-				Context("when using a specified org", func() {
-					Context("when the share to space exists", func() {
-						BeforeEach(func() {
-							cmd.SpaceName = "some-space"
-							cmd.OrgName = "some-other-org"
-							fakeActor.ShareServiceInstanceByOrganizationNameAndSpaceNameReturns(
-								v3action.Warnings{"share-service-warning"},
-								nil)
-						})
+				Context("when the sharing is unsuccessful", func() {
+					BeforeEach(func() {
+						cmd.SpaceName = "some-space"
+						fakeActor.ShareServiceInstanceInSpaceByOrganizationAndSpaceNameReturns(
+							v3action.Warnings{"share-service-warning"},
+							errors.New("sharing failed"))
+					})
 
-						It("shares the service instance with the provided space and org and displays all warnings", func() {
-							Expect(executeErr).ToNot(HaveOccurred())
+					It("shares the service instance with the provided space and displays all warnings", func() {
+						Expect(executeErr).To(MatchError("sharing failed"))
 
-							Expect(testUI.Out).To(Say("Sharing service instance some-service-instance into org some-other-org / space some-space as some-user\\.\\.\\."))
-							Expect(testUI.Out).To(Say("OK"))
-							Expect(testUI.Err).To(Say("share-service-warning"))
+						Expect(testUI.Out).ToNot(Say("OK"))
+						Expect(testUI.Err).To(Say("share-service-warning"))
+					})
+				})
+			})
 
-							Expect(fakeActor.ShareServiceInstanceByOrganizationNameAndSpaceNameCallCount()).To(Equal(1))
-							serviceInstanceNameArg, orgName, spaceNameArg := fakeActor.ShareServiceInstanceByOrganizationNameAndSpaceNameArgsForCall(0)
-							Expect(serviceInstanceNameArg).To(Equal("some-service-instance"))
-							Expect(orgName).To(Equal("some-other-org"))
-							Expect(spaceNameArg).To(Equal("some-space"))
-						})
+			Context("when using a specified org", func() {
+				Context("when the sharing is successful", func() {
+					BeforeEach(func() {
+						cmd.SpaceName = "some-space"
+						cmd.OrgName = "some-other-org"
+						fakeActor.ShareServiceInstanceInSpaceByOrganizationNameAndSpaceNameReturns(
+							v3action.Warnings{"share-service-warning"},
+							nil)
+					})
+
+					It("shares the service instance with the provided space and org and displays all warnings", func() {
+						Expect(executeErr).ToNot(HaveOccurred())
+
+						Expect(testUI.Out).To(Say("Sharing service instance some-service-instance into org some-other-org / space some-space as some-user\\.\\.\\."))
+						Expect(testUI.Out).To(Say("OK"))
+						Expect(testUI.Err).To(Say("share-service-warning"))
+
+						Expect(fakeActor.ShareServiceInstanceInSpaceByOrganizationNameAndSpaceNameCallCount()).To(Equal(1))
+						serviceInstanceNameArg, sourceSpaceGUID, orgName, spaceNameArg := fakeActor.ShareServiceInstanceInSpaceByOrganizationNameAndSpaceNameArgsForCall(0)
+						Expect(serviceInstanceNameArg).To(Equal("some-service-instance"))
+						Expect(sourceSpaceGUID).To(Equal("some-space-guid"))
+						Expect(orgName).To(Equal("some-other-org"))
+						Expect(spaceNameArg).To(Equal("some-space"))
+					})
+				})
+
+				Context("when the sharing is unsuccessful", func() {
+					BeforeEach(func() {
+						cmd.SpaceName = "some-space"
+						cmd.OrgName = "some-other-org"
+						fakeActor.ShareServiceInstanceInSpaceByOrganizationNameAndSpaceNameReturns(
+							v3action.Warnings{"share-service-warning"},
+							errors.New("sharing failed"))
+					})
+
+					It("shares the service instance with the provided space and displays all warnings", func() {
+						Expect(executeErr).To(MatchError("sharing failed"))
+
+						Expect(testUI.Out).ToNot(Say("OK"))
+						Expect(testUI.Err).To(Say("share-service-warning"))
 					})
 				})
 			})

@@ -41,9 +41,10 @@ func (actor Actor) ResetSpaceIsolationSegment(orgGUID string, spaceGUID string) 
 	return isoSegName, allWarnings, nil
 }
 
-func (actor Actor) GetSpaceByName(spaceName string) (Space, Warnings, error) {
+func (actor Actor) GetSpaceByNameAndOrganization(spaceName string, orgGUID string) (Space, Warnings, error) {
 	spaces, warnings, err := actor.CloudControllerClient.GetSpaces(url.Values{
-		ccv3.NameFilter: []string{spaceName},
+		ccv3.NameFilter:             []string{spaceName},
+		ccv3.OrganizationGUIDFilter: []string{orgGUID},
 	})
 
 	if err != nil {

@@ -9,27 +9,29 @@ import (
 
 type ServiceInstance ccv3.ServiceInstance
 
-func (actor Actor) ShareServiceInstanceByOrganizationAndSpaceName(serviceInstanceName string, orgGUID string, spaceName string) (Warnings, error) {
+func (actor Actor) ShareServiceInstanceInSpaceByOrganizationAndSpaceName(serviceInstanceName string, sourceSpaceGUID string, orgGUID string, spaceName string) (Warnings, error) {
 	// get the service instnace guid
-	serviceInstance, _, err := actor.GetServiceInstanceByName(serviceInstanceName)
+	serviceInstance, allWarnings, err := actor.GetServiceInstanceByNameAndSpace(serviceInstanceName, sourceSpaceGUID)
 	if err != nil {
-		return nil, err
+		return allWarnings, err
 	}
 
-	space, _, err := actor.GetSpaceByName(spaceName)
+	space, warnings, err := actor.GetSpaceByNameAndOrganization(spaceName, orgGUID)
+	allWarnings = append(allWarnings, warnings...)
 	if err != nil {
-		return nil, err
+		return allWarnings, err
 	}
 
-	////Think about name of this
-	_, _, err = actor.CloudControllerClient.PostServiceInstanceSharedSpaces(serviceInstance.GUID, []string{space.GUID})
+	_, apiWarnings, err := actor.CloudControllerClient.PostServiceInstanceSharedSpaces(serviceInstance.GUID, []string{space.GUID})
+	allWarnings = append(allWarnings, apiWarnings...)
 
-	return nil, err
+	return allWarnings, err
 }
 
-func (actor Actor) GetServiceInstanceByName(serviceInstanceName string) (ServiceInstance, Warnings, error) {
+func (actor Actor) GetServiceInstanceByNameAndSpace(serviceInstanceName string, spaceGUID string) (ServiceInstance, Warnings, error) {
 	serviceInstances, warnings, err := actor.CloudControllerClient.GetServiceInstances(url.Values{
-		ccv3.NameFilter: []string{serviceInstanceName},
+		ccv3.NameFilter:      []string{serviceInstanceName},
+		ccv3.SpaceGUIDFilter: []string{spaceGUID},
 	})
 
 	if err != nil {

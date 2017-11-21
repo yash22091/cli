@@ -10,8 +10,8 @@ import (
 //go:generate counterfeiter . ShareServiceActor
 
 type ShareServiceActor interface {
-	ShareServiceInstanceByOrganizationAndSpaceName(serviceInstanceName string, orgGUID string, spaceName string) (v3action.Warnings, error)
-	ShareServiceInstanceByOrganizationNameAndSpaceName(serviceInstanceName string, orgName string, spaceName string) (v3action.Warnings, error)
+	ShareServiceInstanceInSpaceByOrganizationAndSpaceName(serviceInstanceName string, sourceSpaceGUID string, targetOrgGUID string, targetSpaceName string) (v3action.Warnings, error)
+	ShareServiceInstanceInSpaceByOrganizationNameAndSpaceName(serviceInstanceName string, sourceSpaceGUID string, targetOrgName string, targetSpaceName string) (v3action.Warnings, error)
 }
 
 type V3ShareServiceCommand struct {
@@ -75,9 +75,9 @@ func (cmd V3ShareServiceCommand) Execute(args []string) error {
 	var warnings v3action.Warnings
 
 	if cmd.OrgName != "" {
-		warnings, err = cmd.Actor.ShareServiceInstanceByOrganizationNameAndSpaceName(cmd.RequiredArgs.ServiceInstance, cmd.OrgName, cmd.SpaceName)
+		warnings, err = cmd.Actor.ShareServiceInstanceInSpaceByOrganizationNameAndSpaceName(cmd.RequiredArgs.ServiceInstance, cmd.Config.TargetedSpace().GUID, cmd.OrgName, cmd.SpaceName)
 	} else {
-		warnings, err = cmd.Actor.ShareServiceInstanceByOrganizationAndSpaceName(cmd.RequiredArgs.ServiceInstance, cmd.Config.TargetedOrganization().GUID, cmd.SpaceName)
+		warnings, err = cmd.Actor.ShareServiceInstanceInSpaceByOrganizationAndSpaceName(cmd.RequiredArgs.ServiceInstance, cmd.Config.TargetedSpace().GUID, cmd.Config.TargetedOrganization().GUID, cmd.SpaceName)
 	}
 
 	cmd.UI.DisplayWarnings(warnings)

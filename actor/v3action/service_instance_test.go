@@ -2,7 +2,9 @@ package v3action_test
 
 import (
 	"errors"
+	"net/url"
 
+	"code.cloudfoundry.org/cli/actor/actionerror"
 	. "code.cloudfoundry.org/cli/actor/v3action"
 	"code.cloudfoundry.org/cli/actor/v3action/v3actionfakes"
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3"
@@ -25,6 +27,7 @@ var _ = Describe("Service Instance Actions", func() {
 	Describe("ShareServiceInstanceByOrganizationAndSpaceName", func() {
 		var (
 			serviceInstanceName string
+			sourceSpaceGUID     string
 			orgGUID             string
 			spaceName           string
 
@@ -34,12 +37,13 @@ var _ = Describe("Service Instance Actions", func() {
 
 		BeforeEach(func() {
 			serviceInstanceName = "some-service-instance"
+			sourceSpaceGUID = "some-source-space-guid"
 			orgGUID = "some-org-guid"
 			spaceName = "some-space-name"
 		})
 
 		JustBeforeEach(func() {
-			warnings, executionError = actor.ShareServiceInstanceByOrganizationAndSpaceName(serviceInstanceName, orgGUID, spaceName)
+			warnings, executionError = actor.ShareServiceInstanceInSpaceByOrganizationAndSpaceName(serviceInstanceName, sourceSpaceGUID, orgGUID, spaceName)
 		})
 
 		Context("when the service instance name is valid", func() {
@@ -49,7 +53,7 @@ var _ = Describe("Service Instance Actions", func() {
 						Name: "some-service-instance",
 						GUID: "some-service-instance-guid",
 					},
-				}, ccv3.Warnings{}, nil)
+				}, ccv3.Warnings{"some-service-instance-warning"}, nil)
 			})
 
 			Context("when the space name is valid", func() {
@@ -59,19 +63,28 @@ var _ = Describe("Service Instance Actions", func() {
 							Name: "some-space",
 							GUID: "some-space-guid",
 						},
-					}, ccv3.Warnings{}, nil)
+					}, ccv3.Warnings{"some-space-warning"}, nil)
 				})
 
 				Context("when the post request to the shared spaces endpoint succeeds", func() {
 					BeforeEach(func() {
-						fakeCloudControllerClient.PostServiceInstanceSharedSpacesReturns(ccv3.RelationshipList{}, ccv3.Warnings{}, nil)
+						fakeCloudControllerClient.PostServiceInstanceSharedSpacesReturns(ccv3.RelationshipList{}, ccv3.Warnings{"some-share-warning"}, nil)
 					})
 
 					It("calls to create a new service instance share", func() {
+						Expect(fakeCloudControllerClient.GetServiceInstancesCallCount()).To(Equal(1))
+						Expect(fakeCloudControllerClient.GetServiceInstancesArgsForCall(0)).To(Equal(url.Values{
+							ccv3.NameFilter:      []string{serviceInstanceName},
+							ccv3.SpaceGUIDFilter: []string{sourceSpaceGUID},
+						}))
+
+						Expect(fakeCloudControllerClient.GetSpacesCallCount()).To(Equal(1))
+						Expect(fakeCloudControllerClient.GetSpacesArgsForCall(0)).To(Equal(url.Values{
+							ccv3.NameFilter:             []string{spaceName},
+							ccv3.OrganizationGUIDFilter: []string{orgGUID},
+						}))
+
 						Expect(fakeCloudControllerClient.PostServiceInstanceSharedSpacesCallCount()).To(Equal(1))
-					})
-
-					It("calls to create a new service instance share", func() {
 						si_guid, space_guids := fakeCloudControllerClient.PostServiceInstanceSharedSpacesArgsForCall(0)
 						Expect(si_guid).To(Equal("some-service-instance-guid"))
 						Expect(space_guids).To(Equal([]string{"some-space-guid"}))
@@ -79,48 +92,117 @@ var _ = Describe("Service Instance Actions", func() {
 
 					It("does not return warnings or errors", func() {
 						Expect(executionError).ToNot(HaveOccurred())
-						Expect(warnings).To(BeEmpty())
+						Expect(warnings).To(ConsistOf("some-service-instance-warning", "some-space-warning", "some-share-warning"))
 					})
 				})
 
 				Context("when the post request to the shared spaces endpoint fails", func() {
-					err := errors.New("Share failed")
 					BeforeEach(func() {
-						fakeCloudControllerClient.PostServiceInstanceSharedSpacesReturns(ccv3.RelationshipList{}, ccv3.Warnings{}, err)
+						fakeCloudControllerClient.PostServiceInstanceSharedSpacesReturns(ccv3.RelationshipList{}, ccv3.Warnings{"some-share-warning"}, errors.New("Share failed"))
 					})
+
 					It("returns error", func() {
-						Expect(executionError).To(Equal(err))
+						Expect(executionError).To(MatchError("Share failed"))
+						Expect(warnings).To(ConsistOf("some-service-instance-warning", "some-space-warning", "some-share-warning"))
 					})
 				})
 			})
 
 			Context("when resolving the space name fails", func() {
-				err := errors.New("Space name doesn't exist")
-
 				BeforeEach(func() {
-					fakeCloudControllerClient.GetSpacesReturns([]ccv3.Space{}, ccv3.Warnings{}, err)
+					fakeCloudControllerClient.GetSpacesReturns([]ccv3.Space{}, ccv3.Warnings{"some-space-warning"}, errors.New("Space name doesn't exist"))
 				})
 
 				It("returns error", func() {
-					Expect(executionError).To(Equal(err))
+					Expect(executionError).To(MatchError("Space name doesn't exist"))
+					Expect(warnings).To(ConsistOf("some-service-instance-warning", "some-space-warning"))
 				})
 			})
 		})
 
 		Context("when resolving the service instance name fails", func() {
-			err := errors.New("service name doesn't exist")
-
 			BeforeEach(func() {
-				fakeCloudControllerClient.GetServiceInstancesReturns([]ccv3.ServiceInstance{}, ccv3.Warnings{}, err)
+				fakeCloudControllerClient.GetServiceInstancesReturns([]ccv3.ServiceInstance{}, ccv3.Warnings{"some-service-instance-warning"}, errors.New("service name doesn't exist"))
 			})
 
 			It("returns error", func() {
-				Expect(executionError).To(Equal(err))
+				Expect(executionError).To(MatchError("service name doesn't exist"))
+				Expect(warnings).To(ConsistOf("some-service-instance-warning"))
 			})
 		})
 	})
 
-	Describe("GetServiceInstanceByName", func() {
-		//todo
+	Describe("GetServiceInstanceByNameAndSpace", func() {
+		var (
+			serviceInstanceName string
+			sourceSpaceGUID     string
+
+			serviceInstance ServiceInstance
+			warnings        Warnings
+			executionError  error
+		)
+
+		BeforeEach(func() {
+			serviceInstanceName = "some-service-instance"
+			sourceSpaceGUID = "some-source-space-guid"
+		})
+
+		JustBeforeEach(func() {
+			serviceInstance, warnings, executionError = actor.GetServiceInstanceByNameAndSpace(serviceInstanceName, sourceSpaceGUID)
+		})
+
+		Context("when the cloud controller request is successful", func() {
+			Context("when the cloud controller returns one service instance", func() {
+				BeforeEach(func() {
+					fakeCloudControllerClient.GetServiceInstancesReturns([]ccv3.ServiceInstance{
+						{
+							Name: "some-service-instance",
+							GUID: "some-service-instance-guid",
+						},
+					}, ccv3.Warnings{"some-service-instance-warning"}, nil)
+				})
+
+				It("returns a service instance and warnings", func() {
+					Expect(executionError).NotTo(HaveOccurred())
+
+					Expect(serviceInstance).To(Equal(ServiceInstance{Name: "some-service-instance", GUID: "some-service-instance-guid"}))
+					Expect(warnings).To(ConsistOf("some-service-instance-warning"))
+					Expect(fakeCloudControllerClient.GetServiceInstancesCallCount()).To(Equal(1))
+					Expect(fakeCloudControllerClient.GetServiceInstancesArgsForCall(0)).To(Equal(url.Values{
+						ccv3.NameFilter:      []string{serviceInstanceName},
+						ccv3.SpaceGUIDFilter: []string{sourceSpaceGUID},
+					}))
+				})
+			})
+
+			Context("when the cloud controller returns no service instances", func() {
+				BeforeEach(func() {
+					fakeCloudControllerClient.GetServiceInstancesReturns(
+						nil,
+						ccv3.Warnings{"some-service-instance-warning"},
+						nil)
+				})
+
+				It("returns an error and warnings", func() {
+					Expect(executionError).To(MatchError(actionerror.ServiceInstanceNotFoundError{Name: serviceInstanceName}))
+
+					Expect(warnings).To(ConsistOf("some-service-instance-warning"))
+				})
+			})
+		})
+
+		Context("when the cloud controller returns an error", func() {
+			BeforeEach(func() {
+				fakeCloudControllerClient.GetServiceInstancesReturns(
+					nil,
+					ccv3.Warnings{"some-service-instance-warning"},
+					errors.New("no service instance"))
+			})
+
+			It("returns an error and warnings", func() {
+				Expect(executionError).To(MatchError("no service instance"))
+				Expect(warnings).To(ConsistOf("some-service-instance-warning"))
+			})
+		})
 	})
 })

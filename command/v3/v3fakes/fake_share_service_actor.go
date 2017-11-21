@@ -9,33 +9,35 @@ import (
 )
 
 type FakeShareServiceActor struct {
-	ShareServiceInstanceByOrganizationAndSpaceNameStub        func(serviceInstanceName string, orgGUID string, spaceName string) (v3action.Warnings, error)
-	shareServiceInstanceByOrganizationAndSpaceNameMutex       sync.RWMutex
-	shareServiceInstanceByOrganizationAndSpaceNameArgsForCall []struct {
+	ShareServiceInstanceInSpaceByOrganizationAndSpaceNameStub        func(serviceInstanceName string, sourceSpaceGUID string, targetOrgGUID string, targetSpaceName string) (v3action.Warnings, error)
+	shareServiceInstanceInSpaceByOrganizationAndSpaceNameMutex       sync.RWMutex
+	shareServiceInstanceInSpaceByOrganizationAndSpaceNameArgsForCall []struct {
 		serviceInstanceName string
-		orgGUID             string
-		spaceName           string
+		sourceSpaceGUID     string
+		targetOrgGUID       string
+		targetSpaceName     string
 	}
-	shareServiceInstanceByOrganizationAndSpaceNameReturns struct {
+	shareServiceInstanceInSpaceByOrganizationAndSpaceNameReturns struct {
 		result1 v3action.Warnings
 		result2 error
 	}
-	shareServiceInstanceByOrganizationAndSpaceNameReturnsOnCall map[int]struct {
+	shareServiceInstanceInSpaceByOrganizationAndSpaceNameReturnsOnCall map[int]struct {
 		result1 v3action.Warnings
 		result2 error
 	}
-	ShareServiceInstanceByOrganizationNameAndSpaceNameStub        func(serviceInstanceName string, orgName string, spaceName string) (v3action.Warnings, error)
-	shareServiceInstanceByOrganizationNameAndSpaceNameMutex       sync.RWMutex
-	shareServiceInstanceByOrganizationNameAndSpaceNameArgsForCall []struct {
+	ShareServiceInstanceInSpaceByOrganizationNameAndSpaceNameStub        func(serviceInstanceName string, sourceSpaceGUID string, targetOrgName string, targetSpaceName string) (v3action.Warnings, error)
+	shareServiceInstanceInSpaceByOrganizationNameAndSpaceNameMutex       sync.RWMutex
+	shareServiceInstanceInSpaceByOrganizationNameAndSpaceNameArgsForCall []struct {
 		serviceInstanceName string
-		orgName             string
-		spaceName           string
+		sourceSpaceGUID     string
+		targetOrgName       string
+		targetSpaceName     string
 	}
-	shareServiceInstanceByOrganizationNameAndSpaceNameReturns struct {
+	shareServiceInstanceInSpaceByOrganizationNameAndSpaceNameReturns struct {
 		result1 v3action.Warnings
 		result2 error
 	}
-	shareServiceInstanceByOrganizationNameAndSpaceNameReturnsOnCall map[int]struct {
+	shareServiceInstanceInSpaceByOrganizationNameAndSpaceNameReturnsOnCall map[int]struct {
 		result1 v3action.Warnings
 		result2 error
 	}
@@ -43,107 +45,109 @@ type FakeShareServiceActor struct {
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeShareServiceActor) ShareServiceInstanceByOrganizationAndSpaceName(serviceInstanceName string, orgGUID string, spaceName string) (v3action.Warnings, error) {
-	fake.shareServiceInstanceByOrganizationAndSpaceNameMutex.Lock()
-	ret, specificReturn := fake.shareServiceInstanceByOrganizationAndSpaceNameReturnsOnCall[len(fake.shareServiceInstanceByOrganizationAndSpaceNameArgsForCall)]
-	fake.shareServiceInstanceByOrganizationAndSpaceNameArgsForCall = append(fake.shareServiceInstanceByOrganizationAndSpaceNameArgsForCall, struct {
+func (fake *FakeShareServiceActor) ShareServiceInstanceInSpaceByOrganizationAndSpaceName(serviceInstanceName string, sourceSpaceGUID string, targetOrgGUID string, targetSpaceName string) (v3action.Warnings, error) {
+	fake.shareServiceInstanceInSpaceByOrganizationAndSpaceNameMutex.Lock()
+	ret, specificReturn := fake.shareServiceInstanceInSpaceByOrganizationAndSpaceNameReturnsOnCall[len(fake.shareServiceInstanceInSpaceByOrganizationAndSpaceNameArgsForCall)]
+	fake.shareServiceInstanceInSpaceByOrganizationAndSpaceNameArgsForCall = append(fake.shareServiceInstanceInSpaceByOrganizationAndSpaceNameArgsForCall, struct {
 		serviceInstanceName string
-		orgGUID             string
-		spaceName           string
-	}{serviceInstanceName, orgGUID, spaceName})
-	fake.recordInvocation("ShareServiceInstanceByOrganizationAndSpaceName", []interface{}{serviceInstanceName, orgGUID, spaceName})
-	fake.shareServiceInstanceByOrganizationAndSpaceNameMutex.Unlock()
-	if fake.ShareServiceInstanceByOrganizationAndSpaceNameStub != nil {
-		return fake.ShareServiceInstanceByOrganizationAndSpaceNameStub(serviceInstanceName, orgGUID, spaceName)
+		sourceSpaceGUID     string
+		targetOrgGUID       string
+		targetSpaceName     string
+	}{serviceInstanceName, sourceSpaceGUID, targetOrgGUID, targetSpaceName})
+	fake.recordInvocation("ShareServiceInstanceInSpaceByOrganizationAndSpaceName", []interface{}{serviceInstanceName, sourceSpaceGUID, targetOrgGUID, targetSpaceName})
+	fake.shareServiceInstanceInSpaceByOrganizationAndSpaceNameMutex.Unlock()
+	if fake.ShareServiceInstanceInSpaceByOrganizationAndSpaceNameStub != nil {
+		return fake.ShareServiceInstanceInSpaceByOrganizationAndSpaceNameStub(serviceInstanceName, sourceSpaceGUID, targetOrgGUID, targetSpaceName)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	return fake.shareServiceInstanceByOrganizationAndSpaceNameReturns.result1, fake.shareServiceInstanceByOrganizationAndSpaceNameReturns.result2
+	return fake.shareServiceInstanceInSpaceByOrganizationAndSpaceNameReturns.result1, fake.shareServiceInstanceInSpaceByOrganizationAndSpaceNameReturns.result2
 }
 
-func (fake *FakeShareServiceActor) ShareServiceInstanceByOrganizationAndSpaceNameCallCount() int {
-	fake.shareServiceInstanceByOrganizationAndSpaceNameMutex.RLock()
-	defer fake.shareServiceInstanceByOrganizationAndSpaceNameMutex.RUnlock()
-	return len(fake.shareServiceInstanceByOrganizationAndSpaceNameArgsForCall)
+func (fake *FakeShareServiceActor) ShareServiceInstanceInSpaceByOrganizationAndSpaceNameCallCount() int {
+	fake.shareServiceInstanceInSpaceByOrganizationAndSpaceNameMutex.RLock()
+	defer fake.shareServiceInstanceInSpaceByOrganizationAndSpaceNameMutex.RUnlock()
+	return len(fake.shareServiceInstanceInSpaceByOrganizationAndSpaceNameArgsForCall)
 }
 
-func (fake *FakeShareServiceActor) ShareServiceInstanceByOrganizationAndSpaceNameArgsForCall(i int) (string, string, string) {
-	fake.shareServiceInstanceByOrganizationAndSpaceNameMutex.RLock()
-	defer fake.shareServiceInstanceByOrganizationAndSpaceNameMutex.RUnlock()
-	return fake.shareServiceInstanceByOrganizationAndSpaceNameArgsForCall[i].serviceInstanceName, fake.shareServiceInstanceByOrganizationAndSpaceNameArgsForCall[i].orgGUID, fake.shareServiceInstanceByOrganizationAndSpaceNameArgsForCall[i].spaceName
+func (fake *FakeShareServiceActor) ShareServiceInstanceInSpaceByOrganizationAndSpaceNameArgsForCall(i int) (string, string, string, string) {
+	fake.shareServiceInstanceInSpaceByOrganizationAndSpaceNameMutex.RLock()
+	defer fake.shareServiceInstanceInSpaceByOrganizationAndSpaceNameMutex.RUnlock()
+	return fake.shareServiceInstanceInSpaceByOrganizationAndSpaceNameArgsForCall[i].serviceInstanceName, fake.shareServiceInstanceInSpaceByOrganizationAndSpaceNameArgsForCall[i].sourceSpaceGUID, fake.shareServiceInstanceInSpaceByOrganizationAndSpaceNameArgsForCall[i].targetOrgGUID, fake.shareServiceInstanceInSpaceByOrganizationAndSpaceNameArgsForCall[i].targetSpaceName
 }
 
-func (fake *FakeShareServiceActor) ShareServiceInstanceByOrganizationAndSpaceNameReturns(result1 v3action.Warnings, result2 error) {
-	fake.ShareServiceInstanceByOrganizationAndSpaceNameStub = nil
-	fake.shareServiceInstanceByOrganizationAndSpaceNameReturns = struct {
+func (fake *FakeShareServiceActor) ShareServiceInstanceInSpaceByOrganizationAndSpaceNameReturns(result1 v3action.Warnings, result2 error) {
+	fake.ShareServiceInstanceInSpaceByOrganizationAndSpaceNameStub = nil
+	fake.shareServiceInstanceInSpaceByOrganizationAndSpaceNameReturns = struct {
 		result1 v3action.Warnings
 		result2 error
 	}{result1, result2}
 }
 
-func (fake *FakeShareServiceActor) ShareServiceInstanceByOrganizationAndSpaceNameReturnsOnCall(i int, result1 v3action.Warnings, result2 error) {
-	fake.ShareServiceInstanceByOrganizationAndSpaceNameStub = nil
-	if fake.shareServiceInstanceByOrganizationAndSpaceNameReturnsOnCall == nil {
-		fake.shareServiceInstanceByOrganizationAndSpaceNameReturnsOnCall = make(map[int]struct {
+func (fake *FakeShareServiceActor) ShareServiceInstanceInSpaceByOrganizationAndSpaceNameReturnsOnCall(i int, result1 v3action.Warnings, result2 error) {
+	fake.ShareServiceInstanceInSpaceByOrganizationAndSpaceNameStub = nil
+	if fake.shareServiceInstanceInSpaceByOrganizationAndSpaceNameReturnsOnCall == nil {
+		fake.shareServiceInstanceInSpaceByOrganizationAndSpaceNameReturnsOnCall = make(map[int]struct {
 			result1 v3action.Warnings
 			result2 error
 		})
 	}
-	fake.shareServiceInstanceByOrganizationAndSpaceNameReturnsOnCall[i] = struct {
+	fake.shareServiceInstanceInSpaceByOrganizationAndSpaceNameReturnsOnCall[i] = struct {
 		result1 v3action.Warnings
 		result2 error
 	}{result1, result2}
 }
 
-func (fake *FakeShareServiceActor) ShareServiceInstanceByOrganizationNameAndSpaceName(serviceInstanceName string, orgName string, spaceName string) (v3action.Warnings, error) {
-	fake.shareServiceInstanceByOrganizationNameAndSpaceNameMutex.Lock()
-	ret, specificReturn := fake.shareServiceInstanceByOrganizationNameAndSpaceNameReturnsOnCall[len(fake.shareServiceInstanceByOrganizationNameAndSpaceNameArgsForCall)]
-	fake.shareServiceInstanceByOrganizationNameAndSpaceNameArgsForCall = append(fake.shareServiceInstanceByOrganizationNameAndSpaceNameArgsForCall, struct {
+func (fake *FakeShareServiceActor) ShareServiceInstanceInSpaceByOrganizationNameAndSpaceName(serviceInstanceName string, sourceSpaceGUID string, targetOrgName string, targetSpaceName string) (v3action.Warnings, error) {
+	fake.shareServiceInstanceInSpaceByOrganizationNameAndSpaceNameMutex.Lock()
+	ret, specificReturn := fake.shareServiceInstanceInSpaceByOrganizationNameAndSpaceNameReturnsOnCall[len(fake.shareServiceInstanceInSpaceByOrganizationNameAndSpaceNameArgsForCall)]
+	fake.shareServiceInstanceInSpaceByOrganizationNameAndSpaceNameArgsForCall = append(fake.shareServiceInstanceInSpaceByOrganizationNameAndSpaceNameArgsForCall, struct {
 		serviceInstanceName string
-		orgName             string
-		spaceName           string
-	}{serviceInstanceName, orgName, spaceName})
-	fake.recordInvocation("ShareServiceInstanceByOrganizationNameAndSpaceName", []interface{}{serviceInstanceName, orgName, spaceName})
-	fake.shareServiceInstanceByOrganizationNameAndSpaceNameMutex.Unlock()
-	if fake.ShareServiceInstanceByOrganizationNameAndSpaceNameStub != nil {
-		return fake.ShareServiceInstanceByOrganizationNameAndSpaceNameStub(serviceInstanceName, orgName, spaceName)
+		sourceSpaceGUID     string
+		targetOrgName       string
+		targetSpaceName     string
+	}{serviceInstanceName, sourceSpaceGUID, targetOrgName, targetSpaceName})
+	fake.recordInvocation("ShareServiceInstanceInSpaceByOrganizationNameAndSpaceName", []interface{}{serviceInstanceName, sourceSpaceGUID, targetOrgName, targetSpaceName})
+	fake.shareServiceInstanceInSpaceByOrganizationNameAndSpaceNameMutex.Unlock()
+	if fake.ShareServiceInstanceInSpaceByOrganizationNameAndSpaceNameStub != nil {
+		return fake.ShareServiceInstanceInSpaceByOrganizationNameAndSpaceNameStub(serviceInstanceName, sourceSpaceGUID, targetOrgName, targetSpaceName)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	return fake.shareServiceInstanceByOrganizationNameAndSpaceNameReturns.result1, fake.shareServiceInstanceByOrganizationNameAndSpaceNameReturns.result2
+	return fake.shareServiceInstanceInSpaceByOrganizationNameAndSpaceNameReturns.result1, fake.shareServiceInstanceInSpaceByOrganizationNameAndSpaceNameReturns.result2
 }
 
-func (fake *FakeShareServiceActor) ShareServiceInstanceByOrganizationNameAndSpaceNameCallCount() int {
-	fake.shareServiceInstanceByOrganizationNameAndSpaceNameMutex.RLock()
-	defer fake.shareServiceInstanceByOrganizationNameAndSpaceNameMutex.RUnlock()
-	return len(fake.shareServiceInstanceByOrganizationNameAndSpaceNameArgsForCall)
+func (fake *FakeShareServiceActor) ShareServiceInstanceInSpaceByOrganizationNameAndSpaceNameCallCount() int {
+	fake.shareServiceInstanceInSpaceByOrganizationNameAndSpaceNameMutex.RLock()
+	defer fake.shareServiceInstanceInSpaceByOrganizationNameAndSpaceNameMutex.RUnlock()
+	return len(fake.shareServiceInstanceInSpaceByOrganizationNameAndSpaceNameArgsForCall)
 }
 
-func (fake *FakeShareServiceActor) ShareServiceInstanceByOrganizationNameAndSpaceNameArgsForCall(i int) (string, string, string) {
-	fake.shareServiceInstanceByOrganizationNameAndSpaceNameMutex.RLock()
-	defer fake.shareServiceInstanceByOrganizationNameAndSpaceNameMutex.RUnlock()
-	return fake.shareServiceInstanceByOrganizationNameAndSpaceNameArgsForCall[i].serviceInstanceName, fake.shareServiceInstanceByOrganizationNameAndSpaceNameArgsForCall[i].orgName, fake.shareServiceInstanceByOrganizationNameAndSpaceNameArgsForCall[i].spaceName
+func (fake *FakeShareServiceActor) ShareServiceInstanceInSpaceByOrganizationNameAndSpaceNameArgsForCall(i int) (string, string, string, string) {
+	fake.shareServiceInstanceInSpaceByOrganizationNameAndSpaceNameMutex.RLock()
+	defer fake.shareServiceInstanceInSpaceByOrganizationNameAndSpaceNameMutex.RUnlock()
+	return fake.shareServiceInstanceInSpaceByOrganizationNameAndSpaceNameArgsForCall[i].serviceInstanceName, fake.shareServiceInstanceInSpaceByOrganizationNameAndSpaceNameArgsForCall[i].sourceSpaceGUID, fake.shareServiceInstanceInSpaceByOrganizationNameAndSpaceNameArgsForCall[i].targetOrgName, fake.shareServiceInstanceInSpaceByOrganizationNameAndSpaceNameArgsForCall[i].targetSpaceName
 }
 
-func (fake *FakeShareServiceActor) ShareServiceInstanceByOrganizationNameAndSpaceNameReturns(result1 v3action.Warnings, result2 error) {
-	fake.ShareServiceInstanceByOrganizationNameAndSpaceNameStub = nil
-	fake.shareServiceInstanceByOrganizationNameAndSpaceNameReturns = struct {
+func (fake *FakeShareServiceActor) ShareServiceInstanceInSpaceByOrganizationNameAndSpaceNameReturns(result1 v3action.Warnings, result2 error) {
+	fake.ShareServiceInstanceInSpaceByOrganizationNameAndSpaceNameStub = nil
+	fake.shareServiceInstanceInSpaceByOrganizationNameAndSpaceNameReturns = struct {
 		result1 v3action.Warnings
 		result2 error
 	}{result1, result2}
 }
 
-func (fake *FakeShareServiceActor) ShareServiceInstanceByOrganizationNameAndSpaceNameReturnsOnCall(i int, result1 v3action.Warnings, result2 error) {
-	fake.ShareServiceInstanceByOrganizationNameAndSpaceNameStub = nil
-	if fake.shareServiceInstanceByOrganizationNameAndSpaceNameReturnsOnCall == nil {
-		fake.shareServiceInstanceByOrganizationNameAndSpaceNameReturnsOnCall = make(map[int]struct {
+func (fake *FakeShareServiceActor) ShareServiceInstanceInSpaceByOrganizationNameAndSpaceNameReturnsOnCall(i int, result1 v3action.Warnings, result2 error) {
+	fake.ShareServiceInstanceInSpaceByOrganizationNameAndSpaceNameStub = nil
+	if fake.shareServiceInstanceInSpaceByOrganizationNameAndSpaceNameReturnsOnCall == nil {
+		fake.shareServiceInstanceInSpaceByOrganizationNameAndSpaceNameReturnsOnCall = make(map[int]struct {
 			result1 v3action.Warnings
 			result2 error
 		})
 	}
-	fake.shareServiceInstanceByOrganizationNameAndSpaceNameReturnsOnCall[i] = struct {
+	fake.shareServiceInstanceInSpaceByOrganizationNameAndSpaceNameReturnsOnCall[i] = struct {
 		result1 v3action.Warnings
 		result2 error
 	}{result1, result2}
@@ -152,10 +156,10 @@ func (fake *FakeShareServiceActor) ShareServiceInstanceByOrganizationNameAndSpac
 func (fake *FakeShareServiceActor) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
-	fake.shareServiceInstanceByOrganizationAndSpaceNameMutex.RLock()
-	defer fake.shareServiceInstanceByOrganizationAndSpaceNameMutex.RUnlock()
-	fake.shareServiceInstanceByOrganizationNameAndSpaceNameMutex.RLock()
-	defer fake.shareServiceInstanceByOrganizationNameAndSpaceNameMutex.RUnlock()
+	fake.shareServiceInstanceInSpaceByOrganizationAndSpaceNameMutex.RLock()
+	defer fake.shareServiceInstanceInSpaceByOrganizationAndSpaceNameMutex.RUnlock()
+	fake.shareServiceInstanceInSpaceByOrganizationNameAndSpaceNameMutex.RLock()
+	defer fake.shareServiceInstanceInSpaceByOrganizationNameAndSpaceNameMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
 	for key, value := range fake.invocations {
 		copiedInvocations[key] = value
